@@ -6,18 +6,17 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- Родительский POM Spring Boot -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.1.4</version>
+		<relativePath/>
 	</parent>
 
 	<groupId>ee.ivkhk</groupId>
-	<artifactId>sportstoreNPTV23</artifactId>
+	<artifactId>StoreSpringJPA</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>sportstoreNPTV23</name>
+	<name>StoreSpringJPA</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -25,47 +24,49 @@
 	</properties>
 
 	<dependencies>
-		<!-- Spring Boot Starter Data JPA -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- MySQL Connector with явно указанной версией -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.33</version> <!-- Добавленная версия -->
+			<version>8.0.33</version>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Spring Boot Starter -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
-		<!-- Дополнительные зависимости (если есть) -->
-		<!-- Например, если вы используете Lombok: -->
-		<!--
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<!-- Spring Boot Maven Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-			<!-- Другие плагины (если есть) -->
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+	</repositories>
 </project>
