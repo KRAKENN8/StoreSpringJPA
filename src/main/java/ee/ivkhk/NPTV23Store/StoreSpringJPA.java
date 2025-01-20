@@ -32,7 +32,7 @@ public class StoreSpringJPA implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		System.out.println("------ Магазин спортивного инвентаря ------");
+		System.out.println("------ Магазин для домашних животных ------");
 		boolean repeat = true;
 		while (repeat) {
 			try {
@@ -82,7 +82,7 @@ public class StoreSpringJPA implements CommandLineRunner {
 				System.out.println("----------------------------------------");
 			} catch (Exception e) {
 				System.out.println("Ошибка: " + e.getMessage());
-				e.printStackTrace(); // Для отладки
+				e.printStackTrace();
 			}
 		}
 		System.out.println("До свидания :)");
