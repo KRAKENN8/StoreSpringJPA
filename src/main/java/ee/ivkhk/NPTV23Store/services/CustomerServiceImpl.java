@@ -1,9 +1,9 @@
 package ee.ivkhk.NPTV23Store.services;
 
 import ee.ivkhk.NPTV23Store.entity.Customer;
-import ee.ivkhk.NPTV23Store.repository.CustomerRepository;
 import ee.ivkhk.NPTV23Store.interfaces.CustomerService;
 import ee.ivkhk.NPTV23Store.interfaces.CustomerHelper;
+import ee.ivkhk.NPTV23Store.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,48 +24,73 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean add() {
-        // Интерфейсный метод add() – интерактивное добавление через helper
-        Optional<Customer> oc = customerHelper.create();
-        if (oc.isEmpty()) return false;
-        customerRepository.save(oc.get());
-        return true;
+        try {
+            // создаём покупателя через хелпер
+            Optional<Customer> oc = customerHelper.create();
+            if (oc.isEmpty()) {
+                System.out.println("Ошибка: некорректные данные покупателя!");
+                return false;
+            }
+            customerRepository.save(oc.get());
+            System.out.println("Покупатель успешно добавлен!");
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при добавлении покупателя: " + e.getMessage());
+            return false;
+        }
     }
 
     @Override
     public boolean update(Customer ignored) {
-        // Текущее интерактивное редактирование (через helper.edit(...))
-        Optional<Customer> oc = customerHelper.edit(null);
-        if (oc.isEmpty()) return false;
+        try {
+            // редактируем покупателя через хелпер
+            Optional<Customer> oc = customerHelper.edit(null);
+            if (oc.isEmpty()) {
+                System.out.println("Ошибка: неверные данные при редактировании покупателя!");
+                return false;
+            }
+            Customer edited = oc.get();
 
-        Customer edited = oc.get();
-        Optional<Customer> dbCustomer = findCustomerById(edited.getId());
-        if (dbCustomer.isEmpty()) {
-            System.out.println("Нет покупателя с таким ID: " + edited.getId());
+            Optional<Customer> dbCustomer = customerRepository.findById(edited.getId());
+            if (dbCustomer.isEmpty()) {
+                System.out.println("Нет покупателя с ID: " + edited.getId());
+                return false;
+            }
+            Customer existing = dbCustomer.get();
+
+            if (edited.getFirstName() != null && !edited.getFirstName().isEmpty()) {
+                existing.setFirstName(edited.getFirstName());
+            }
+            if (edited.getLastName() != null && !edited.getLastName().isEmpty()) {
+                existing.setLastName(edited.getLastName());
+            }
+            if (edited.getBalance() >= 0) {
+                existing.setBalance(edited.getBalance());
+            }
+
+            customerRepository.save(existing);
+            System.out.println("Покупатель успешно обновлён!");
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при обновлении покупателя: " + e.getMessage());
             return false;
         }
-        Customer existing = dbCustomer.get();
-
-        if (edited.getFirstName() != null && !edited.getFirstName().isEmpty()) {
-            existing.setFirstName(edited.getFirstName());
-        }
-        if (edited.getLastName() != null && !edited.getLastName().isEmpty()) {
-            existing.setLastName(edited.getLastName());
-        }
-        if (edited.getBalance() >= 0) {
-            existing.setBalance(edited.getBalance());
-        }
-        customerRepository.save(existing);
-        return true;
-    }
-
-    @Override
-    public boolean changeAvailability() {
-        return false; // у Customer нет поля "available"
     }
 
     @Override
     public boolean print() {
-        return customerHelper.printList(customerRepository.findAll());
+        try {
+            customerHelper.printList(customerRepository.findAll());
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при выводе списка покупателей: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean changeAvailability() {
+        return false;
     }
 
     @Override
@@ -73,11 +98,9 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findById(id);
     }
 
-    /**
-     * Наш новый метод: «тихое» сохранение без интерактива.
-     */
+    // «Тихое» сохранение (без опроса пользователя), напр. при покупках
     @Override
-    public void saveCustomer(Customer c) {
-        customerRepository.save(c);
+    public void saveCustomer(Customer customer) {
+        customerRepository.save(customer);
     }
 }

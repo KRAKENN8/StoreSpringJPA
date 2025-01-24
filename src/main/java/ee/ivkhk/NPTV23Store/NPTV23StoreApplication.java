@@ -51,47 +51,38 @@ public class NPTV23StoreApplication implements CommandLineRunner {
 
 				System.out.print("Введите номер задачи: ");
 				int task = input.getInt();
+
 				switch (task) {
-					case 0 -> repeat = false;
-					case 1 -> {
-						if (productService.add()) {
-							System.out.println("Товар успешно добавлен!");
-						} else {
-							System.out.println("Ошибка при добавлении товара!");
-						}
-					}
-					case 2 -> productService.print();
-					case 3 -> {
-						if (productService.update(null)) {
-							System.out.println("Товар успешно обновлён!");
-						} else {
-							System.out.println("Ошибка при обновлении товара!");
-						}
-					}
-					case 4 -> {
-						if (customerService.add()) {
-							System.out.println("Покупатель успешно добавлен!");
-						} else {
-							System.out.println("Ошибка при добавлении покупателя!");
-						}
-					}
-					case 5 -> customerService.print();
-					case 6 -> {
-						if (customerService.update(null)) {
-							System.out.println("Покупатель успешно обновлён!");
-						} else {
-							System.out.println("Ошибка при обновлении покупателя!");
-						}
-					}
-					case 7 -> {
-						if (purchaseService.add()) {
-							System.out.println("Покупка успешно совершена!");
-						} else {
-							System.out.println("Ошибка при совершении покупки!");
-						}
-					}
-					case 8 -> purchaseService.print(); // Здесь логика расчёта дохода
-					default -> System.out.println("Выберите задачу из списка!");
+					case 0:
+						repeat = false;
+						break;
+					case 1:
+						productService.add();
+						break;
+					case 2:
+						productService.print();
+						break;
+					case 3:
+						productService.update(null);
+						break;
+					case 4:
+						customerService.add();
+						break;
+					case 5:
+						customerService.print();
+						break;
+					case 6:
+						customerService.update(null);
+						break;
+					case 7:
+						purchaseService.add();
+						break;
+					case 8:
+						purchaseService.print();
+						break;
+					default:
+						System.out.println("Выберите задачу из списка!");
+						break;
 				}
 				System.out.println("----------------------------------------");
 			} catch (Exception e) {

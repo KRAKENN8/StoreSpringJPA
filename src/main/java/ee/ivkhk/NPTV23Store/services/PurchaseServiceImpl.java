@@ -7,8 +7,8 @@ import ee.ivkhk.NPTV23Store.interfaces.*;
 import ee.ivkhk.NPTV23Store.repository.PurchaseRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -18,7 +18,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseHelper purchaseHelper;
     private final CustomerService customerService;
     private final ProductService productService;
-    private final Input input; // Нужно для считывания дат в print() (доход)
+    private final Input input; // для логики дохода в print()
 
     public PurchaseServiceImpl(
             PurchaseRepository purchaseRepository,
@@ -31,134 +31,129 @@ public class PurchaseServiceImpl implements PurchaseService {
         this.purchaseHelper = purchaseHelper;
         this.customerService = customerService;
         this.productService = productService;
-        this.input = input; // сохраняем Input
+        this.input = input;
     }
 
     @Override
     public boolean add() {
-        // Пункт 7: «Купить товар»
-        Optional<Purchase> op = purchaseHelper.create();
-        if (op.isEmpty()) {
+        try {
+            // «Купить товар»
+            Optional<Purchase> op = purchaseHelper.create();
+            if (op.isEmpty()) {
+                System.out.println("Ошибка: неверные данные покупки!");
+                return false;
+            }
+            Purchase purchase = op.get();
+
+            Long custId = purchase.getCustomer().getId();
+            Long prodId = purchase.getProduct().getId();
+            int qty = purchase.getQuantity();
+
+            Optional<Customer> oc = customerService.findCustomerById(custId);
+            if (oc.isEmpty()) {
+                System.out.println("Нет покупателя с ID " + custId);
+                return false;
+            }
+            Optional<Product> op2 = productService.findProductById(prodId);
+            if (op2.isEmpty()) {
+                System.out.println("Нет товара с ID " + prodId);
+                return false;
+            }
+            Customer c = oc.get();
+            Product p = op2.get();
+
+            double totalCost = p.getPrice() * qty;
+            if (c.getBalance() < totalCost) {
+                System.out.println("Недостаточно средств у покупателя!");
+                return false;
+            }
+            if (p.getQuantity() < qty) {
+                System.out.println("Недостаточно товара на складе!");
+                return false;
+            }
+
+            // Сохраняем саму покупку
+            purchase.setCustomer(c);
+            purchase.setProduct(p);
+            purchase.setPurchaseDate(LocalDateTime.now());
+            purchaseRepository.save(purchase);
+
+            // «Тихо» списываем баланс/остаток
+            c.setBalance(c.getBalance() - totalCost);
+            p.setQuantity(p.getQuantity() - qty);
+
+            customerService.saveCustomer(c);
+            productService.saveProduct(p);
+
+            System.out.println("Покупка успешно совершена!");
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при совершении покупки: " + e.getMessage());
             return false;
         }
-        Purchase purchase = op.get();
-
-        Long custId = purchase.getCustomer().getId();
-        Long prodId = purchase.getProduct().getId();
-        int qty = purchase.getQuantity();
-
-        // Ищем покупателя
-        Optional<Customer> oc = customerService.findCustomerById(custId);
-        if (oc.isEmpty()) {
-            System.out.println("Покупатель с ID " + custId + " не найден!");
-            return false;
-        }
-        // Ищем товар
-        Optional<Product> op2 = productService.findProductById(prodId);
-        if (op2.isEmpty()) {
-            System.out.println("Товар с ID " + prodId + " не найден!");
-            return false;
-        }
-
-        Customer c = oc.get();
-        Product p = op2.get();
-
-        // Проверяем баланс и остаток товара
-        double totalCost = p.getPrice() * qty;
-        if (c.getBalance() < totalCost) {
-            System.out.println("Недостаточно средств у покупателя!");
-            return false;
-        }
-        if (p.getQuantity() < qty) {
-            System.out.println("Недостаточно товара на складе!");
-            return false;
-        }
-
-        // Сохраняем саму покупку (в таблицу purchase)
-        purchase.setCustomer(c);
-        purchase.setProduct(p);
-        purchase.setPurchaseDate(LocalDateTime.now());
-        purchaseRepository.save(purchase);
-
-        // «Тихо» обновляем данные (баланс, кол-во), не вызывая интерактивный update(...)
-        c.setBalance(c.getBalance() - totalCost);
-        p.setQuantity(p.getQuantity() - qty);
-
-        // Сохраняем изменения через методы без опроса
-        customerService.saveCustomer(c);
-        productService.saveProduct(p);
-
-        System.out.println("Покупка успешно совершена!");
-        return true;
     }
 
     @Override
     public boolean update(Purchase purchase) {
-        // Обычно покупку не редактируем
+        // Обычно покупку не редактируем, но если нужно — аналогично
         return false;
     }
 
     @Override
     public boolean changeAvailability() {
-        // Неактуально для покупок
         return false;
     }
 
     @Override
     public boolean print() {
-        // Пункт 8: «Доход магазина за период» — дневной, месячный, годовой
+        // Логика дохода (п.8)
         try {
-            // 1) Доход за конкретный день
             System.out.print("Введите год (например, 2025): ");
             int year = input.getInt();
             System.out.print("Введите месяц (1-12): ");
             int month = input.getInt();
             System.out.print("Введите день (1-31): ");
             int day = input.getInt();
-
             LocalDate date = LocalDate.of(year, month, day);
             double dailyIncome = getIncomeRange(date, date);
             System.out.printf("Доход магазина за %s: %.2f%n", date, dailyIncome);
 
-            // 2) Доход за месяц
-            System.out.print("Введите год для расчета дохода за месяц: ");
+            // Месяц
+            System.out.print("Введите год для дохода за месяц: ");
             int yearM = input.getInt();
             System.out.print("Введите месяц (1-12): ");
             int monthM = input.getInt();
-            LocalDate startOfMonth = LocalDate.of(yearM, monthM, 1);
-            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
-            double monthlyIncome = getIncomeRange(startOfMonth, endOfMonth);
-            System.out.printf("Доход магазина за %02d.%d: %.2f%n", monthM, yearM, monthlyIncome);
+            LocalDate startM = LocalDate.of(yearM, monthM, 1);
+            LocalDate endM = startM.withDayOfMonth(startM.lengthOfMonth());
+            double monthlyIncome = getIncomeRange(startM, endM);
+            System.out.printf("Доход магазина за %d-%02d: %.2f%n", yearM, monthM, monthlyIncome);
 
-            // 3) Доход за год
-            System.out.print("Введите год для расчета дохода: ");
-            int fullYear = input.getInt();
-            LocalDate startOfYear = LocalDate.of(fullYear, 1, 1);
-            LocalDate endOfYear = LocalDate.of(fullYear, 12, 31);
-            double yearlyIncome = getIncomeRange(startOfYear, endOfYear);
-            System.out.printf("Доход магазина за год %d: %.2f%n", fullYear, yearlyIncome);
+            // Год
+            System.out.print("Введите год для дохода за год: ");
+            int fullY = input.getInt();
+            LocalDate startY = LocalDate.of(fullY, 1, 1);
+            LocalDate endY = LocalDate.of(fullY, 12, 31);
+            double yearlyIncome = getIncomeRange(startY, endY);
+            System.out.printf("Доход магазина за год %d: %.2f%n", fullY, yearlyIncome);
 
             return true;
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Ошибка при расчёте дохода: " + e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Вспомогательный метод для расчёта дохода в интервале дат [start, end]
-     */
     private double getIncomeRange(LocalDate start, LocalDate end) {
-        LocalDateTime from = start.atStartOfDay();
-        LocalDateTime to = end.plusDays(1).atStartOfDay();
+        var from = start.atStartOfDay();
+        var to = end.plusDays(1).atStartOfDay();
 
-        double totalIncome = 0.0;
+        double total = 0.0;
         for (Purchase p : purchaseRepository.findAll()) {
-            LocalDateTime pd = p.getPurchaseDate();
+            var pd = p.getPurchaseDate();
             if (!pd.isBefore(from) && pd.isBefore(to)) {
-                totalIncome += p.getProduct().getPrice() * p.getQuantity();
+                total += p.getProduct().getPrice() * p.getQuantity();
             }
         }
-        return totalIncome;
+        return total;
     }
 }

@@ -1,9 +1,9 @@
 package ee.ivkhk.NPTV23Store.services;
 
 import ee.ivkhk.NPTV23Store.entity.Product;
-import ee.ivkhk.NPTV23Store.repository.ProductRepository;
 import ee.ivkhk.NPTV23Store.interfaces.ProductService;
 import ee.ivkhk.NPTV23Store.interfaces.ProductHelper;
+import ee.ivkhk.NPTV23Store.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,61 +24,92 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean add() {
-        // интерактивное добавление
-        Optional<Product> op = productHelper.create();
-        if (op.isEmpty()) return false;
-        productRepository.save(op.get());
-        return true;
+        try {
+            // просим хелпер создать новый товар (через ввод пользователя)
+            Optional<Product> op = productHelper.create();
+            if (op.isEmpty()) {
+                System.out.println("Ошибка: некорректные данные товара!");
+                return false;
+            }
+            // сохраняем в базу
+            productRepository.save(op.get());
+            // выводим сообщение об успехе
+            System.out.println("Товар успешно добавлен!");
+            return true;
+        } catch (Exception e) {
+            // выводим сообщение об ошибке
+            System.out.println("Ошибка при добавлении товара: " + e.getMessage());
+            return false;
+        }
     }
 
     @Override
     public boolean update(Product ignored) {
-        // интерактивное редактирование
-        Optional<Product> op = productHelper.edit(null);
-        if (op.isEmpty()) return false;
+        try {
+            // просим хелпер отредактировать товар (через ввод пользователя)
+            Optional<Product> op = productHelper.edit(null);
+            if (op.isEmpty()) {
+                System.out.println("Ошибка: неверные данные при редактировании товара!");
+                return false;
+            }
+            Product edited = op.get();
 
-        Product edited = op.get();
-        Optional<Product> dbProd = findProductById(edited.getId());
-        if (dbProd.isEmpty()) {
-            System.out.println("Нет товара с таким ID: " + edited.getId());
+            // ищем существующий товар в базе
+            Optional<Product> dbProd = productRepository.findById(edited.getId());
+            if (dbProd.isEmpty()) {
+                System.out.println("Нет товара с ID: " + edited.getId());
+                return false;
+            }
+            Product existing = dbProd.get();
+
+            // применяем изменения
+            if (edited.getName() != null && !edited.getName().isBlank()) {
+                existing.setName(edited.getName());
+            }
+            if (edited.getPrice() > 0) {
+                existing.setPrice(edited.getPrice());
+            }
+            if (edited.getQuantity() >= 0) {
+                existing.setQuantity(edited.getQuantity());
+            }
+
+            // сохраняем изменения
+            productRepository.save(existing);
+            System.out.println("Товар успешно обновлён!");
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при обновлении товара: " + e.getMessage());
             return false;
         }
-        Product existing = dbProd.get();
-
-        if (edited.getName() != null && !edited.getName().isBlank()) {
-            existing.setName(edited.getName());
-        }
-        if (edited.getPrice() > 0) {
-            existing.setPrice(edited.getPrice());
-        }
-        if (edited.getQuantity() >= 0) {
-            existing.setQuantity(edited.getQuantity());
-        }
-        productRepository.save(existing);
-        return true;
-    }
-
-    @Override
-    public boolean changeAvailability() {
-        return false; // если нет поля "available"
     }
 
     @Override
     public boolean print() {
-        // список товаров
-        return productHelper.printList(productRepository.findAll());
+        try {
+            // вывод списка товаров делает хелпер
+            productHelper.printList(productRepository.findAll());
+            return true;
+        } catch (Exception e) {
+            System.out.println("Ошибка при выводе списка товаров: " + e.getMessage());
+            return false;
+        }
     }
 
+    @Override
+    public boolean changeAvailability() {
+        // Если нужно, можно добавить вывод сообщений
+        return false;
+    }
+
+    // Дополнительный метод, если у вас в коде вызывается
     @Override
     public Optional<Product> findProductById(Long id) {
         return productRepository.findById(id);
     }
 
-    /**
-     * Наш новый метод для «тихого» сохранения изменений товара
-     */
+    // Для «тихого» сохранения без ввода пользователя (например, при покупках)
     @Override
-    public void saveProduct(Product p) {
-        productRepository.save(p);
+    public void saveProduct(Product product) {
+        productRepository.save(product);
     }
 }
