@@ -18,17 +18,17 @@ public interface Input {
             try {
                 return Double.parseDouble(getString());
             } catch (NumberFormatException e) {
-                System.out.print("Пожалуйста, введите корректное число: ");
+                System.out.print("Пожалуйста, введите корректное число (double): ");
             }
         }
     }
 
-    default Long getLong() {
+    default long getLong() {
         while (true) {
             try {
                 return Long.parseLong(getString());
             } catch (NumberFormatException e) {
-                System.out.print("Пожалуйста, введите корректный ID (число): ");
+                System.out.print("Пожалуйста, введите корректный long: ");
             }
         }
     }
