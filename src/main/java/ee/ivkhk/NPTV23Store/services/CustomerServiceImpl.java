@@ -96,7 +96,6 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findById(id);
     }
 
-    // «Тихое» сохранение (без опроса пользователя), напр. при покупках
     @Override
     public void saveCustomer(Customer customer) {
         customerRepository.save(customer);
