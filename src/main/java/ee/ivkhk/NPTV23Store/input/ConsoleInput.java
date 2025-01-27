@@ -14,8 +14,4 @@ public class ConsoleInput implements Input {
     public String getString() {
         return scanner.nextLine();
     }
-
-    // При желании можно переопределить getInt, getDouble, getLong
-    // но если default-реализация устраивает, их можно не трогать.
-
 }

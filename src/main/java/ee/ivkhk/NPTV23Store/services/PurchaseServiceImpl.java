@@ -18,7 +18,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseHelper purchaseHelper;
     private final CustomerService customerService;
     private final ProductService productService;
-    private final Input input; // для логики дохода в print()
+    private final Input input;
 
     public PurchaseServiceImpl(
             PurchaseRepository purchaseRepository,
@@ -37,7 +37,6 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public boolean add() {
         try {
-            // «Купить товар»
             Optional<Purchase> op = purchaseHelper.create();
             if (op.isEmpty()) {
                 System.out.println("Ошибка: неверные данные покупки!");
@@ -72,13 +71,11 @@ public class PurchaseServiceImpl implements PurchaseService {
                 return false;
             }
 
-            // Сохраняем саму покупку
             purchase.setCustomer(c);
             purchase.setProduct(p);
             purchase.setPurchaseDate(LocalDateTime.now());
             purchaseRepository.save(purchase);
 
-            // «Тихо» списываем баланс/остаток
             c.setBalance(c.getBalance() - totalCost);
             p.setQuantity(p.getQuantity() - qty);
 
@@ -95,7 +92,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public boolean update(Purchase purchase) {
-        // Обычно покупку не редактируем, но если нужно — аналогично
         return false;
     }
 
@@ -106,7 +102,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public boolean print() {
-        // Логика дохода (п.8)
         try {
             System.out.print("Введите год (например, 2025): ");
             int year = input.getInt();
@@ -118,7 +113,6 @@ public class PurchaseServiceImpl implements PurchaseService {
             double dailyIncome = getIncomeRange(date, date);
             System.out.printf("Доход магазина за %s: %.2f%n", date, dailyIncome);
 
-            // Месяц
             System.out.print("Введите год для дохода за месяц: ");
             int yearM = input.getInt();
             System.out.print("Введите месяц (1-12): ");
@@ -128,7 +122,6 @@ public class PurchaseServiceImpl implements PurchaseService {
             double monthlyIncome = getIncomeRange(startM, endM);
             System.out.printf("Доход магазина за %d-%02d: %.2f%n", yearM, monthM, monthlyIncome);
 
-            // Год
             System.out.print("Введите год для дохода за год: ");
             int fullY = input.getInt();
             LocalDate startY = LocalDate.of(fullY, 1, 1);

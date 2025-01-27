@@ -34,7 +34,6 @@ public class CustomerHelperImpl implements CustomerHelper {
                 return Optional.empty();
             }
 
-            // Создаем нового покупателя
             Customer c = new Customer(firstName, lastName, balance);
             return Optional.of(c);
         } catch (Exception e) {
@@ -46,11 +45,9 @@ public class CustomerHelperImpl implements CustomerHelper {
     @Override
     public Optional<Customer> edit(Customer ignored) {
         try {
-            // Сначала спрашиваем ID, кого редактировать
             System.out.print("Введите ID покупателя для редактирования: ");
             long id = input.getLong();
 
-            // Создаём временный объект, чтобы передать его в сервис
             Customer c = new Customer();
             c.setId(id);
 
@@ -94,8 +91,6 @@ public class CustomerHelperImpl implements CustomerHelper {
 
     @Override
     public Long findIdEntityForChangeAvailability(List<Customer> ts) {
-        // Если бы Customer имел поле "available", могли бы тут менять
-        // Пока вернём 0
         return 0L;
     }
 }

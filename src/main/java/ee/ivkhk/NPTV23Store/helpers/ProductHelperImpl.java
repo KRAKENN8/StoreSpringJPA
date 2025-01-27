@@ -82,7 +82,6 @@ public class ProductHelperImpl implements ProductHelper {
 
     @Override
     public Long findIdEntityForChangeAvailability(List<Product> ts) {
-        // Аналогично, если бы у Product был "available"
         return 0L;
     }
 }

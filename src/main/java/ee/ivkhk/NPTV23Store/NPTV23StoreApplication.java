@@ -35,6 +35,7 @@ public class NPTV23StoreApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		System.out.println("------ Магазин товаров для домашних животных ------");
+		System.out.println("--------------------------------------");
 		boolean repeat = true;
 		while (repeat) {
 			try {
@@ -84,7 +85,7 @@ public class NPTV23StoreApplication implements CommandLineRunner {
 						System.out.println("Выберите задачу из списка!");
 						break;
 				}
-				System.out.println("----------------------------------------");
+				System.out.println("--------------------------------------");
 			} catch (Exception e) {
 				System.out.println("Ошибка: " + e.getMessage());
 				e.printStackTrace();

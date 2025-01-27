@@ -26,8 +26,6 @@ public class Customer {
         this.balance = balance;
     }
 
-    // Геттеры, сеттеры
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

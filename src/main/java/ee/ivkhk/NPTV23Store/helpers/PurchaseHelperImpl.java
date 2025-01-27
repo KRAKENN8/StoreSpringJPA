@@ -30,7 +30,6 @@ public class PurchaseHelperImpl implements PurchaseHelper {
             System.out.print("Введите количество: ");
             int qty = input.getInt();
 
-            // Создаём "заглушки" сущностей, реальные данные подтянем в сервисе:
             Customer c = new Customer();
             c.setId(customerId);
             Product p = new Product();
@@ -51,7 +50,6 @@ public class PurchaseHelperImpl implements PurchaseHelper {
 
     @Override
     public Optional<Purchase> edit(Purchase purchase) {
-        // Обычно покупку не редактируем
         return Optional.empty();
     }
 
@@ -61,7 +59,6 @@ public class PurchaseHelperImpl implements PurchaseHelper {
             System.out.println("Список покупок пуст!");
             return false;
         }
-        // Если бы мы хотели печатать каждую покупку, делаем:
         for (Purchase pur : purchases) {
             System.out.printf("ID:%d, ПокупательID:%d, ТоварID:%d, Количество:%d, Дата:%s%n",
                     pur.getId(),
@@ -76,7 +73,6 @@ public class PurchaseHelperImpl implements PurchaseHelper {
 
     @Override
     public Long findIdEntityForChangeAvailability(List<Purchase> ts) {
-        // Неактуально
         return 0L;
     }
 }

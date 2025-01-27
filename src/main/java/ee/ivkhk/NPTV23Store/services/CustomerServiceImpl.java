@@ -25,7 +25,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public boolean add() {
         try {
-            // создаём покупателя через хелпер
             Optional<Customer> oc = customerHelper.create();
             if (oc.isEmpty()) {
                 System.out.println("Ошибка: некорректные данные покупателя!");
@@ -43,7 +42,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public boolean update(Customer ignored) {
         try {
-            // редактируем покупателя через хелпер
             Optional<Customer> oc = customerHelper.edit(null);
             if (oc.isEmpty()) {
                 System.out.println("Ошибка: неверные данные при редактировании покупателя!");
